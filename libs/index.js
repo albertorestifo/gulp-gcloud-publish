@@ -1,3 +1,5 @@
+'use strict';
+
 var gcloud = require('gcloud');
 var gutil = require('gulp-util');
 var mime = require('mime');

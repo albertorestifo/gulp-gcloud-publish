@@ -1,0 +1,27 @@
+{
+  "eqeqeq": true,
+  "freeze": true,
+  "futurehostile": true,
+  "latedef": true,
+  "maxcomplexity": 5,
+  "maxdepth": 3,
+  "maxparams": 3,
+  "noarg": true,
+  "nocomma": true,
+  "nonbsp": true,
+  "nonew": true,
+  "singleGroups": true,
+  "undef": true,
+  "unused": true,
+  "asi": true,
+  "esnext": true,
+  "plusplus": true,
+  "strict": true,
+
+  "node": true,
+  "mocha": true,
+  "globals": {
+    "should": false
+  },
+  "expr": true
+}
