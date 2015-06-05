@@ -1,6 +1,4 @@
-# gulp-gcloud-publish
-
-[![NPM](https://img.shields.io/npm/v/gulp-gcloud-publish.svg?style=flat-square)](https://www.npmjs.com/package/gulp-gcloud-publish)
+# gulp-gcloud-publish [![NPM](https://img.shields.io/npm/v/gulp-gcloud-publish.svg?style=flat-square)](https://www.npmjs.com/package/gulp-gcloud-publish)
 
 
 > Upload files to Google Cloud Storage with Gulp
@@ -21,11 +19,11 @@ The plugin takes a configuration object with the following keys:
 - keyFilename `String`: Full path to the Google Cloud API keyfile ([docs][gc-docs])
 - projectId `String`: Google Cloud Project ID ([docs][gc-docs])
 - base `String`: base path to use in the bucket, default to `/`
-- public `Bollean` (optional): If set to true, marks the uploaded file as public
+- public `Boolean` (optional): If set to true, marks the uploaded file as public
 
 ## Example
 
-The plugins works best with [gulp-gzip](https://www.npmjs.com/package/gulp-gzip).
+If you would like to `gzip` the files, the plugin works best with [gulp-gzip](https://www.npmjs.com/package/gulp-gzip).
 
 ```js
 var gulp = require('gulp');
