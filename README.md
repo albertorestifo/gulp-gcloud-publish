@@ -1,5 +1,6 @@
-# gulp-gcloud-publish [![NPM](https://img.shields.io/npm/v/gulp-gcloud-publish.svg?style=flat-square)](https://www.npmjs.com/package/gulp-gcloud-publish) [![Build Status](https://img.shields.io/travis/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://travis-ci.org/albertorestifo/gulp-gcloud-publish) [![Code Coverage](https://img.shields.io/codeclimate/coverage/github/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://codeclimate.com/github/albertorestifo/gulp-gcloud-publish) [![Code Quality](https://img.shields.io/codeclimate/github/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://codeclimate.com/github/albertorestifo/gulp-gcloud-publish) [![Dependencies Status](https://img.shields.io/david/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://david-dm.org/albertorestifo/gulp-gcloud-publish)
+# gulp-gcloud-publish
 
+[![NPM](https://img.shields.io/npm/v/gulp-gcloud-publish.svg?style=flat-square)](https://www.npmjs.com/package/gulp-gcloud-publish) [![Build Status](https://img.shields.io/travis/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://travis-ci.org/albertorestifo/gulp-gcloud-publish) [![Code Coverage](https://img.shields.io/codeclimate/coverage/github/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://codeclimate.com/github/albertorestifo/gulp-gcloud-publish) [![Code Quality](https://img.shields.io/codeclimate/github/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://codeclimate.com/github/albertorestifo/gulp-gcloud-publish) [![Dependencies Status](https://img.shields.io/david/albertorestifo/gulp-gcloud-publish.svg?style=flat-square)](https://david-dm.org/albertorestifo/gulp-gcloud-publish)
 
 > Upload files to Google Cloud Storage with Gulp
 
@@ -43,9 +44,5 @@ gulp.task('publish', function() {
       })); // => File will be uploaded to /bucket-name/css/example.css
 });
 ```
-
-## To Do
-
-- Write spec tests __Help Wanted__
 
 [gc-docs]: https://googlecloudplatform.github.io/gcloud-node/#/authorization
