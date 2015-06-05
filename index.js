@@ -4,49 +4,77 @@ var gutil = require('gulp-util');
 var mime = require('mime');
 
 var PLUGIN_NAME = 'gulp-gcloud-publish';
+var PluginError = gutil.PluginError;
 
-module.exports = function(options) {
-  options = options || {};
+/**
+ * Get the file metadata
+ *
+ * @private
+ * @param {File} file
+ */
+function getMetadata(file) {
+  var _meta = {
+    contentType: mime.lookup(file.path)
+  }
+
+  // Check if it's gziped
+  if (file.contentEncoding && file.contentEncoding.indexOf('gzip') > -1) {
+    _meta.contentEncoding = 'gzip';
+  }
+
+  return _meta;
+}
+
+/**
+ * Upload a file stream to Google Cloud Storage
+ *
+ * @param {Object}  options
+ * @param {String}  options.bucket         - Name of the bucket we want to upload the file into
+ * @param {String}  options.keyFilename   - Full path to the KeyFile JSON
+ * @param {String}  options.projectId     - Project id
+ * @param {Boolean} [options.public] - Set the file as public
+ */
+function gPublish(options) {
+  // A configuration object is required
+  if (!options) {
+    throw new PluginError(PLUGIN_NAME, 'Missing configurations object!');
+  }
+  // And most of the keys also are
+  if (!options.bucket || !options.keyFilename || !options.projectId) {
+    throw new PluginError(PLUGIN_NAME, 'Missing required configuration params');
+  }
 
   return through.obj(function(file, enc, done) {
-    // authentication options must be set
-    if (!options.auth) {
-      this.emit('error', new gutil.PluginError(PLUGIN_NAME,
-          'Authentication options must be set'));
-      return done();
-    }
+    if (file.isNull()) { done(null, file); }
 
-    // Check for empty file
-    if (file.isNull()) { return done(); }
+    // remove the `.gz` if present
+    file.path = file.path.replace(/\.gz$/, '');
 
-    var metadata = {};
-
-    // Check if it's gziped
-    if (file.contentEncoding && file.contentEncoding.indexOf('gzip') > -1) {
-      // if the file path ends with `.gz`, remove it
-      file.path = file.path.replace(/\.gz$/, '');
-
-      metadata.contentEncoding = 'gzip';
-    }
-
-    metadata.contentType = mime.lookup(file.path);
+    var metadata = getMetadata(file);
 
     // Authenticate on Google Cloud Storage
     var storage = gcloud.storage({
-      keyFilename: options.auth.keyFilename,
-      projectId: options.auth.projectId
+      keyFilename: options.keyFilename,
+      projectId: options.projectId
     });
 
     var bucket = storage.bucket(options.bucket);
 
-    file.pipe(bucket.file(file.path).createWriteStream({
-          metadata: metadata
-        }))
-        .on('error', function(err) {
-          this.emit('error', err);
-          return done();
-        })
-        .on('complete', done);
+    var gcFile = bucket.file(file.path);
+
+    file.pipe(gcFile.createWriteStream({metadata: metadata}))
+        .on('error', done)
+        .on('complete', function() {
+          if (options.public) {
+            return gcFile.makePublic(function(err) {
+              done(err, file);
+            });
+          }
+
+          return done(null, file);
+        });
 
   });
 }
+
+module.exports = gPublish;
