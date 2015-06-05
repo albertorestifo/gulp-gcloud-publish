@@ -7,6 +7,7 @@ var es = require('event-stream');
 var rewire = require('rewire');
 var sinon = require('sinon');
 var through = require('through2');
+var _ = require('underscore');
 
 var expect = chai.expect;
 chai.should();
@@ -20,17 +21,21 @@ describe('gulp-gcloud-publish', function() {
   var bucketStub = sinon.stub();
   var fileStub = sinon.stub();
   var createWriteStreamStub = sinon.stub();
-  var makePublicStub = sinon.stub();
 
   var gcloudMock = {
     storage: storageStub
   }
 
+  var makePublicCallCount = 0;
+
   storageStub.returns({bucket: bucketStub});
   bucketStub.returns({file: fileStub});
   fileStub.returns({
     createWriteStream: createWriteStreamStub,
-    makePublic: makePublicStub
+    makePublic: function(cb) {
+      makePublicCallCount += 1;
+      cb();
+    }
   });
 
   function createFakeStream() {
@@ -44,9 +49,6 @@ describe('gulp-gcloud-publish', function() {
     });
 
   }
-
-  createWriteStreamStub.returns(createFakeStream());
-  makePublicStub.returns(function(cb) { cb(); })
 
   gcloud.__set__('gcloud', gcloudMock);
 
@@ -87,6 +89,7 @@ describe('gulp-gcloud-publish', function() {
   });
 
   it('should set the correct metadata', function(done) {
+    createWriteStreamStub.returns(createFakeStream());
     var fakeFile = new File({
       contents: es.readArray(['stream', 'with', 'those', 'contents']),
       cwd: '/',
@@ -110,28 +113,117 @@ describe('gulp-gcloud-publish', function() {
   });
 
   it('should recognise a gzip and make it public', function(done) {
+    createWriteStreamStub.returns(createFakeStream());
+    makePublicCallCount = 0;
     var fakeFile = new File({
       contents: es.readArray(['stream', 'with', 'those', 'contents']),
       cwd: '/',
       base: '/test/',
-      path: '/test/file.css.gz',
-      public: true
+      path: '/test/file.css.gz'
     });
 
-    var task = gcloud(exampleConfig);
+    var config = _.clone(exampleConfig);
+    config.public = true;
+
+    var task = gcloud(config);
 
     task.write(fakeFile);
     task.on('data', function(file) {
-      createWriteStreamStub.calledOnce.should.be.true;
-      var metadata = createWriteStreamStub.args[0][0].metadata;
+      var metadata = createWriteStreamStub.args[1][0].metadata;
       metadata.should.have.all.keys({
         contentType: 'text/css',
         contentEncoding: 'gzip'
       });
 
-      makePublicStub.calledOnce.should.be.true;
+      makePublicCallCount.should.equal(1);
 
       file.path.should.not.match(/\.gz$/);
+
+      done();
+    })
+    .on('error', done);
+  });
+
+  it('should be called with a bucket home path', function(done) {
+    createWriteStreamStub.returns(createFakeStream());
+    var fakeFile = new File({
+      contents: es.readArray(['stream', 'with', 'those', 'contents']),
+      cwd: '/',
+      base: '/test/',
+      path: '/test/file.css'
+    });
+
+    var task = gcloud(exampleConfig);
+
+    task.write(fakeFile);
+    task.on('data', function() {
+      fileStub.lastCall.calledWith('file.css').should.be.true;
+
+      done();
+    })
+    .on('error', done);
+  });
+
+  it('should use the correct path when starting with a \/', function(done) {
+    createWriteStreamStub.returns(createFakeStream());
+    var fakeFile = new File({
+      contents: es.readArray(['stream', 'with', 'those', 'contents']),
+      cwd: '/',
+      base: '/test/',
+      path: '/test/file.css'
+    });
+
+    var config = _.clone(exampleConfig);
+    config.base = '/test';
+    var task = gcloud(config);
+
+    task.write(fakeFile);
+    task.on('data', function() {
+      fileStub.lastCall.calledWith('test/file.css').should.be.true;
+
+      done();
+    })
+    .on('error', done);
+  });
+
+  it('should use the correct path when ending with a \/', function(done) {
+    createWriteStreamStub.returns(createFakeStream());
+    var fakeFile = new File({
+      contents: es.readArray(['stream', 'with', 'those', 'contents']),
+      cwd: '/',
+      base: '/test/',
+      path: '/test/file.css'
+    });
+
+    var config = _.clone(exampleConfig);
+    config.base = 'test/';
+    var task = gcloud(config);
+
+    task.write(fakeFile);
+    task.on('data', function() {
+      fileStub.lastCall.calledWith('test/file.css').should.be.true;
+
+      done();
+    })
+    .on('error', done);
+  });
+
+  it('should use the correct path when starting and ending with a \/', function(done) {
+    createWriteStreamStub.returns(createFakeStream());
+    var fakeFile = new File({
+      contents: es.readArray(['stream', 'with', 'those', 'contents']),
+      cwd: '/',
+      base: '/test/',
+      path: '/test/file.css'
+    });
+
+    var config = _.clone(exampleConfig);
+    config.base = '/test/';
+    var task = gcloud(config);
+
+    task.write(fakeFile);
+    task.on('data', function() {
+      fileStub.lastCall.calledWith('test/file.css').should.be.true;
 
       done();
     })

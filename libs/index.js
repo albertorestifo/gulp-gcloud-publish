@@ -15,7 +15,7 @@ var PluginError = gutil.PluginError;
  * @param {File} file
  */
 function getMetadata(file) {
-  var _meta = {
+  var meta = {
     contentType: mime.lookup(file.path)
   }
 
@@ -23,10 +23,10 @@ function getMetadata(file) {
   if (
     file.contentEncoding && file.contentEncoding.indexOf('gzip') > -1 ||
     /\.gz$/.test(file.path)) {
-    _meta.contentEncoding = 'gzip';
+    meta.contentEncoding = 'gzip';
   }
 
-  return _meta;
+  return meta;
 }
 
 /**
