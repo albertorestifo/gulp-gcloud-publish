@@ -1,7 +1,7 @@
 var gcloud = require('gcloud');
-var through = require('through2');
 var gutil = require('gulp-util');
 var mime = require('mime');
+var through = require('through2');
 
 var PLUGIN_NAME = 'gulp-gcloud-publish';
 var PluginError = gutil.PluginError;
@@ -26,13 +26,44 @@ function getMetadata(file) {
 }
 
 /**
+ * Normalize the path to save the file on GCS
+ *
+ * @param base - Base path
+ * @param file - File to save
+ */
+function normalizePath(base, file) {
+  var _relative = file.path.replace(file.base, '');
+
+  // ensure there is a tailing slash in the base path
+  if (base && !/\/$/.test(base)) {
+    base += '/';
+  }
+
+  // ensure the is no starting slash
+  if (base && /^\//.test(base)) {
+    base = base.replace(/^\//, '');
+  }
+
+  base = base || '';
+  return base + _relative;
+}
+
+/**
+ * Log the file succesfully uploaded
+ */
+function logSuccess(gPath) {
+  gutil.log('Upladed', gutil.colors.cyan(gPath));
+}
+
+/**
  * Upload a file stream to Google Cloud Storage
  *
  * @param {Object}  options
- * @param {String}  options.bucket         - Name of the bucket we want to upload the file into
- * @param {String}  options.keyFilename   - Full path to the KeyFile JSON
- * @param {String}  options.projectId     - Project id
- * @param {Boolean} [options.public] - Set the file as public
+ * @param {String}  options.bucket      - Name of the bucket we want to upload the file into
+ * @param {String}  options.keyFilename - Full path to the KeyFile JSON
+ * @param {String}  options.projectId   - Project id
+ * @param {String}  [options.base='/']  - Base path for saving the file
+ * @param {Boolean} [options.public]    - Set the file as public
  */
 function gPublish(options) {
   // A configuration object is required
@@ -60,17 +91,21 @@ function gPublish(options) {
 
     var bucket = storage.bucket(options.bucket);
 
-    var gcFile = bucket.file(file.path);
+    var gcPah = normalizePath(options.base, file);
+
+    var gcFile = bucket.file(gcPah);
 
     file.pipe(gcFile.createWriteStream({metadata: metadata}))
         .on('error', done)
         .on('complete', function() {
           if (options.public) {
             return gcFile.makePublic(function(err) {
+              logSuccess(gcPah);
               done(err, file);
             });
           }
 
+          logSuccess(gcPah);
           return done(null, file);
         });
 
