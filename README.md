@@ -1,5 +1,8 @@
 # gulp-gcloud-publish
 
+[![NPM](https://img.shields.io/npm/v/gulp-gcloud-publish.svg?style=flat-square)](https://www.npmjs.com/package/gulp-gcloud-publish)
+
+
 > Upload files to Google Cloud Storage with Gulp
 
 ## Install
@@ -31,7 +34,7 @@ var gzip = require('gulp-gzip'); // optional
 
 gulp.task('publish', function() {
 
-  return gulp.src('public/css/*.css')
+  return gulp.src('public/css/example.css')
       .pipe(gzip()) // optional
       .pipe(gcPub({
         bucket: 'bucket-name',
@@ -39,9 +42,12 @@ gulp.task('publish', function() {
         projectId: 'my-project-id',
         base: '/css',
         public: true
-      })); // => File will be uploaded to /bucket-name/css/*.css
+      })); // => File will be uploaded to /bucket-name/css/example.css
 });
 ```
 
+## To Do
+
+- Write spec tests __Help Wanted__
 
 [gc-docs]: https://googlecloudplatform.github.io/gcloud-node/#/authorization
