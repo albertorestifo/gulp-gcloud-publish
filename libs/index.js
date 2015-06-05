@@ -20,7 +20,9 @@ function getMetadata(file) {
   }
 
   // Check if it's gziped
-  if (file.contentEncoding && file.contentEncoding.indexOf('gzip') > -1) {
+  if (
+    file.contentEncoding && file.contentEncoding.indexOf('gzip') > -1 ||
+    /\.gz$/.test(file.path)) {
     _meta.contentEncoding = 'gzip';
   }
 
@@ -80,10 +82,8 @@ function gPublish(options) {
   return through.obj(function(file, enc, done) {
     if (file.isNull()) { done(null, file); }
 
-    // remove the `.gz` if present
-    file.path = file.path.replace(/\.gz$/, '');
-
     var metadata = getMetadata(file);
+    file.path = file.path.replace(/\.gz$/, '');
 
     // Authenticate on Google Cloud Storage
     var storage = gcloud.storage({

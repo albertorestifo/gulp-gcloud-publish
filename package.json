@@ -4,7 +4,7 @@
   "description": "Gulp task to publish to Google Clod Storage",
   "main": "./libs/index.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "istanbul cover _mocha -- -R spec"
   },
   "repository": {
     "type": "git",
@@ -33,8 +33,11 @@
   },
   "devDependencies": {
     "chai": "^3.0.0",
+    "event-stream": "^3.3.1",
+    "istanbul": "^0.3.14",
     "mocha": "^2.2.5",
     "rewire": "^2.3.3",
-    "sinon": "^1.14.1"
+    "sinon": "^1.14.1",
+    "vinyl": "^0.5.0"
   }
 }
