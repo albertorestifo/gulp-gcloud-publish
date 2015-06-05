@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "0.12"
+  - "0.11"
+  - "0.10"
+  - "0.8"
+  - "iojs"
+addons:
+  code_climate:
+    repo_token: 775ce46fb231b47485dd7b849917616150dc78ea5cd38a07deda93b78860e9f3
+after_script:
+  - codeclimate < lcov.info
