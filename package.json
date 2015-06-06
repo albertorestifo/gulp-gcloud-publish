@@ -20,7 +20,7 @@
     "gulpplugin"
   ],
   "author": "Alberto Restifo",
-  "license": "MIT",
+  "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/albertorestifo/gulp-gcloud-publish/issues"
   },
