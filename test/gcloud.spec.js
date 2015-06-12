@@ -2,12 +2,12 @@
 
 /** Test dependencies */
 var File = require('vinyl');
+var _ = require('underscore');
 var chai = require('chai');
 var es = require('event-stream');
 var rewire = require('rewire');
 var sinon = require('sinon');
 var through = require('through2');
-var _ = require('underscore');
 
 var expect = chai.expect;
 chai.should();
@@ -121,6 +121,8 @@ describe('gulp-gcloud-publish', function() {
       base: '/test/',
       path: '/test/file.css.gz'
     });
+
+    fakeFile.contentEncoding = ['gzip'];
 
     var config = _.clone(exampleConfig);
     config.public = true;
