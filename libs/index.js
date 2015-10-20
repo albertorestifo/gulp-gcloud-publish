@@ -54,7 +54,7 @@ function normalizePath(base, file) {
  * Log the file succesfully uploaded
  */
 function logSuccess(gPath) {
-  gutil.log('Upladed', gutil.colors.cyan(gPath));
+  gutil.log('Uploaded', gutil.colors.cyan(gPath));
 }
 
 /**
@@ -70,7 +70,7 @@ function logSuccess(gPath) {
 function gPublish(options) {
   // A configuration object is required
   if (!options) {
-    throw new PluginError(PLUGIN_NAME, 'Missing configurations object!');
+    throw new PluginError(PLUGIN_NAME, 'Missing configuration object!');
   }
   // And most of the keys also are
   if (!options.bucket || !options.keyFilename || !options.projectId) {
