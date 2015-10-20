@@ -98,7 +98,7 @@ function gPublish(options) {
 
     file.pipe(gcFile.createWriteStream({metadata: metadata}))
         .on('error', done)
-        .on('complete', function() {
+        .on('finish', function() {
           if (options.public) {
             return gcFile.makePublic(function(err) {
               logSuccess(gcPah);
