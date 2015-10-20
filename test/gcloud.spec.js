@@ -56,7 +56,7 @@ describe('gulp-gcloud-publish', function() {
   it('should throw an error when missing configuration object', function() {
     expect(function() {
           return gcloud()
-        }).to.throw(/Missing configurations object/);
+        }).to.throw(/Missing configuration object/);
   });
 
   it('should throw an error when missing requred parameters', function() {
