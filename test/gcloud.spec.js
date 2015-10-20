@@ -42,12 +42,7 @@ describe('gulp-gcloud-publish', function() {
     return through(function(chunk, enc, next) {
       this.push(chunk)
       next();
-    })
-    .on('data', function() {})
-    .on('end', function() {
-      this.emit('complete');
     });
-
   }
 
   gcloud.__set__('gcloud', gcloudMock);
