@@ -97,7 +97,9 @@ function gPublish(options) {
     var gcFile = bucket.file(gcPah);
 
     file.pipe(gcFile.createWriteStream({metadata: metadata}))
-        .on('error', done)
+        .on('error', function(e){
+          throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
+        })
         .on('finish', function() {
           if (options.public) {
             return gcFile.makePublic(function(err) {
