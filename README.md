@@ -40,7 +40,10 @@ gulp.task('publish', function() {
         keyFilename: 'path/to/keyFile.json',
         projectId: 'my-project-id',
         base: '/css',
-        public: true
+        public: true,        
+        metadata: {
+            cacheControl: 'max-age=315360000, no-transform, public',
+        }
       })); // => File will be uploaded to /bucket-name/css/example.css
 });
 ```
