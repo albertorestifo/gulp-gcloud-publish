@@ -14,7 +14,7 @@ var PluginError = gutil.PluginError;
  * @private
  * @param {File} file
  */
-function getMetadata(file) {
+function getMetadata(file, metadata) {
   var meta = {
     contentType: mime.lookup(file.path)
   }
@@ -22,6 +22,10 @@ function getMetadata(file) {
   // Check if it's gziped
   if (file.contentEncoding && file.contentEncoding.indexOf('gzip') > -1) {
     meta.contentEncoding = 'gzip';
+  }
+
+  if (metadata && metadata.cacheControl) {
+      meta.cacheControl = metadata.cacheControl;
   }
 
   return meta;
@@ -66,6 +70,7 @@ function logSuccess(gPath) {
  * @param {String}  options.projectId   - Project id
  * @param {String}  [options.base='/']  - Base path for saving the file
  * @param {Boolean} [options.public]    - Set the file as public
+ * @param {Object} [options.metadata]   - Set the file metadata
  */
 function gPublish(options) {
   // A configuration object is required
@@ -82,7 +87,7 @@ function gPublish(options) {
     if (file.isNull()) { done(null, file); }
 
     file.path = file.path.replace(/\.gz$/, '');
-    var metadata = getMetadata(file);
+    var metadata = getMetadata(file, options.metadata);
 
     // Authenticate on Google Cloud Storage
     var storage = gcloud.storage({
@@ -92,7 +97,7 @@ function gPublish(options) {
 
     var bucket = storage.bucket(options.bucket);
 
-    var gcPah = normalizePath(options.base, file);
+    var gcPah = normalizePath(options.base, file);    
 
     var gcFile = bucket.file(gcPah);
 
