@@ -4,6 +4,7 @@ var gcloud = require('gcloud');
 var gutil = require('gulp-util');
 var mime = require('mime');
 var through = require('through2');
+var fs = require('fs');
 
 var PLUGIN_NAME = 'gulp-gcloud-publish';
 var PluginError = gutil.PluginError;
@@ -58,6 +59,13 @@ function logSuccess(gPath) {
 }
 
 /**
+ * Log the file succesfully made public
+ */
+function logPublic(gPath) {
+  gutil.log('Made public', gutil.colors.cyan(gPath));
+}
+
+/**
  * Upload a file stream to Google Cloud Storage
  *
  * @param {Object}  options
@@ -77,11 +85,8 @@ function gPublish(options) {
     throw new PluginError(PLUGIN_NAME, 'Missing required configuration params');
   }
 
-  return through.obj(function(file, enc, done) {
-    /* istanbul ignore next */
-    if (file.isNull()) { done(null, file); }
+  return through.obj(function(file, encoding, done) {
 
-    file.path = file.path.replace(/\.gz$/, '');
     var metadata = getMetadata(file);
 
     // Authenticate on Google Cloud Storage
@@ -92,26 +97,35 @@ function gPublish(options) {
 
     var bucket = storage.bucket(options.bucket);
 
-    var gcPah = normalizePath(options.base, file);
-
-    var gcFile = bucket.file(gcPah);
-
-    file.pipe(gcFile.createWriteStream({metadata: metadata}))
-        .on('error', function(e){
-          throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
-        })
-        .on('finish', function() {
-          if (options.public) {
-            return gcFile.makePublic(function(err) {
-              logSuccess(gcPah);
-              done(err, file);
+    // get the filename
+    var fileToUpload = file.history[0];
+    // set the basename for the remote file
+    var fileRemote = fileToUpload.replace(file.base, '');
+    // if the file is NOT an directory, upload it
+    if(fs.lstatSync(fileToUpload).isDirectory() === false){
+      // set upload object
+      var uploadOptions = { destination: fileRemote };
+      // return the done callback when uploaded
+      return bucket.upload(fileToUpload, uploadOptions, function(err, uploadedFile) {
+        // Make public if needed
+        if(options.public){
+            return uploadedFile.makePublic(function(){
+              logSuccess(fileRemote);
+              logPublic(fileRemote);
+              return done();
             });
+        } else {
+          // Debug info
+          logSuccess(fileRemote);
+          if (!err) {
+            return done();
           }
-
-          logSuccess(gcPah);
-          return done(null, file);
-        });
-
+        }
+      });
+    } else {
+      // if it is a directory, directly return the done callback
+      return done();
+    }
   });
 }
 
