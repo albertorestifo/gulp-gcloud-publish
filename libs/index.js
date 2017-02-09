@@ -103,7 +103,9 @@ function gPublish(options) {
     var uploadOptions = {
       destination: options.transformDestination ? options.transformDestination(gcPath) : gcPath,
       metadata: metadata,
+      gzip: !!options.gzip,
       public: options.public || metadata.contentEncoding === "gzip",
+      resumable: !!options.resumable
     };
 
     file.pipe(
