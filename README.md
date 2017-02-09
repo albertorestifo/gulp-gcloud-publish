@@ -17,10 +17,12 @@ First, you need to create your Google Cloud API credentials. [__Official Docs__]
 The plugin takes a configuration object with the following keys:
 
 - bucket `String`: Name of the bucket where we want to upload the file
+- gzip `Boolean` (optional): Let Google automatically gzip and mark metadata of your file. Regardless of this setting, already-gzipped files will have metadata properly set.
 - keyFilename `String`: Full path to the Google Cloud API keyfile ([docs][gc-docs])
 - projectId `String`: Google Cloud Project ID ([docs][gc-docs])
 - base `String`: base path to use in the bucket, default to `/`
 - public `Boolean` (optional): If set to true, marks the uploaded file as public
+- resumable `Boolean` (optional): Should be set to true for large files (>10Mb). Default is `false`.
 - transformDestination `Function` (optional): Manipulates the final destination of the file in the bucket.
 
 ## Example
