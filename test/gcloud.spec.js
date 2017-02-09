@@ -22,16 +22,10 @@ describe('gulp-gcloud-publish', function() {
   var fileStub = sinon.stub();
   var createWriteStreamStub = sinon.stub();
 
-  var makePublicCallCount = 0;
-
   gcloudStorageStub.returns({bucket: bucketStub});
   bucketStub.returns({file: fileStub});
   fileStub.returns({
-    createWriteStream: createWriteStreamStub,
-    makePublic: function(cb) {
-      makePublicCallCount += 1;
-      cb();
-    }
+    createWriteStream: createWriteStreamStub
   });
 
   function createFakeStream() {
@@ -105,7 +99,6 @@ describe('gulp-gcloud-publish', function() {
 
   it('should recognise a gzip and make it public', function(done) {
     createWriteStreamStub.returns(createFakeStream());
-    makePublicCallCount = 0;
     var fakeFile = new File({
       contents: es.readArray(['stream', 'with', 'those', 'contents']),
       cwd: '/',
@@ -122,13 +115,16 @@ describe('gulp-gcloud-publish', function() {
 
     task.write(fakeFile);
     task.on('data', function(file) {
-      var metadata = createWriteStreamStub.args[1][0].metadata;
+      var uploadOptions = createWriteStreamStub.args[1][0];
+      var metadata = uploadOptions.metadata;
+      var publicOption = uploadOptions.public;
+
       metadata.should.have.all.keys({
         contentType: 'text/css',
         contentEncoding: 'gzip'
       });
 
-      makePublicCallCount.should.equal(1);
+      publicOption.should.be.true;
 
       file.path.should.not.match(/\.gz$/);
 

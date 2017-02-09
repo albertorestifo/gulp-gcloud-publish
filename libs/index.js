@@ -103,7 +103,7 @@ function gPublish(options) {
 
     var uploadOptions = {
       metadata: metadata,
-      public: options.public,
+      public: options.public || metadata.contentEncoding === "gzip",
     };
 
     file.pipe(gcFile.createWriteStream(uploadOptions))
