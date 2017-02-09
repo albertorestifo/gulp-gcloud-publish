@@ -1,6 +1,6 @@
 'use strict';
 
-var gcloud = require('gcloud');
+var gcloudStorage = require('@google-cloud/storage');
 var gutil = require('gulp-util');
 var mime = require('mime');
 var through = require('through2');
@@ -90,30 +90,28 @@ function gPublish(options) {
     var metadata = getMetadata(file, options.metadata);
 
     // Authenticate on Google Cloud Storage
-    var storage = gcloud.storage({
+    var storage = gcloudStorage({
       keyFilename: options.keyFilename,
       projectId: options.projectId
     });
 
     var bucket = storage.bucket(options.bucket);
 
-    var gcPah = normalizePath(options.base, file);    
+    var gcPath = normalizePath(options.base, file);
 
-    var gcFile = bucket.file(gcPah);
+    var gcFile = bucket.file(gcPath);
 
-    file.pipe(gcFile.createWriteStream({metadata: metadata}))
+    var uploadOptions = {
+      metadata: metadata,
+      public: options.public,
+    };
+
+    file.pipe(gcFile.createWriteStream(uploadOptions))
         .on('error', function(e){
           throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
         })
         .on('finish', function() {
-          if (options.public) {
-            return gcFile.makePublic(function(err) {
-              logSuccess(gcPah);
-              done(err, file);
-            });
-          }
-
-          logSuccess(gcPah);
+          logSuccess(gcPath);
           return done(null, file);
         });
 

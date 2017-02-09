@@ -13,22 +13,18 @@ var expect = chai.expect;
 chai.should();
 
 /** Tested module */
-var gcloud = rewire('../libs/');
+var gcloudStorage = rewire('../libs/');
 
 describe('gulp-gcloud-publish', function() {
   /** Mock Gcloud */
-  var storageStub = sinon.stub();
+  var gcloudStorageStub = sinon.stub();
   var bucketStub = sinon.stub();
   var fileStub = sinon.stub();
   var createWriteStreamStub = sinon.stub();
 
-  var gcloudMock = {
-    storage: storageStub
-  }
-
   var makePublicCallCount = 0;
 
-  storageStub.returns({bucket: bucketStub});
+  gcloudStorageStub.returns({bucket: bucketStub});
   bucketStub.returns({file: fileStub});
   fileStub.returns({
     createWriteStream: createWriteStreamStub,
@@ -45,7 +41,7 @@ describe('gulp-gcloud-publish', function() {
     });
   }
 
-  gcloud.__set__('gcloud', gcloudMock);
+  gcloudStorage.__set__('gcloudStorage', gcloudStorageStub);
 
   var exampleConfig = {
     bucket: 'something',
@@ -55,13 +51,13 @@ describe('gulp-gcloud-publish', function() {
 
   it('should throw an error when missing configuration object', function() {
     expect(function() {
-          return gcloud()
+          return gcloudStorage()
         }).to.throw(/Missing configuration object/);
   });
 
   it('should throw an error when missing requred parameters', function() {
     function callWith(options) {
-      return function() { return gcloud(options); };
+      return function() { return gcloudStorage(options); };
     }
 
     // missing projectId
@@ -92,7 +88,7 @@ describe('gulp-gcloud-publish', function() {
       path: '/test/file.css'
     });
 
-    var task = gcloud(exampleConfig);
+    var task = gcloudStorage(exampleConfig);
 
     task.write(fakeFile);
     task.on('data', function(file) {
@@ -122,7 +118,7 @@ describe('gulp-gcloud-publish', function() {
     var config = _.clone(exampleConfig);
     config.public = true;
 
-    var task = gcloud(config);
+    var task = gcloudStorage(config);
 
     task.write(fakeFile);
     task.on('data', function(file) {
@@ -150,7 +146,7 @@ describe('gulp-gcloud-publish', function() {
       path: '/test/file.css'
     });
 
-    var task = gcloud(exampleConfig);
+    var task = gcloudStorage(exampleConfig);
 
     task.write(fakeFile);
     task.on('data', function() {
@@ -172,7 +168,7 @@ describe('gulp-gcloud-publish', function() {
 
     var config = _.clone(exampleConfig);
     config.base = '/test';
-    var task = gcloud(config);
+    var task = gcloudStorage(config);
 
     task.write(fakeFile);
     task.on('data', function() {
@@ -194,7 +190,7 @@ describe('gulp-gcloud-publish', function() {
 
     var config = _.clone(exampleConfig);
     config.base = 'test/';
-    var task = gcloud(config);
+    var task = gcloudStorage(config);
 
     task.write(fakeFile);
     task.on('data', function() {
@@ -216,7 +212,7 @@ describe('gulp-gcloud-publish', function() {
 
     var config = _.clone(exampleConfig);
     config.base = '/test/';
-    var task = gcloud(config);
+    var task = gcloudStorage(config);
 
     task.write(fakeFile);
     task.on('data', function() {
