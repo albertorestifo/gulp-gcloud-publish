@@ -87,7 +87,6 @@ function gPublish(options) {
     if (file.isNull()) { done(null, file); }
 
     file.path = file.path.replace(/\.gz$/, '');
-    var metadata = getMetadata(file, options.metadata);
 
     // Authenticate on Google Cloud Storage
     var storage = gcloudStorage({
@@ -97,23 +96,26 @@ function gPublish(options) {
 
     var bucket = storage.bucket(options.bucket);
 
-    var gcPath = normalizePath(options.base, file);
+    var gcPath = normalizePath(options.base, file).replace(/\\/g, "/");
 
-    var gcFile = bucket.file(gcPath);
+    var metadata = getMetadata(file, options.metadata);
 
     var uploadOptions = {
+      destination: options.transformDestination ? options.transformDestination(gcPath) : gcPath,
       metadata: metadata,
       public: options.public || metadata.contentEncoding === "gzip",
     };
 
-    file.pipe(gcFile.createWriteStream(uploadOptions))
-        .on('error', function(e){
-          throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
-        })
-        .on('finish', function() {
-          logSuccess(gcPath);
-          return done(null, file);
-        });
+    file.pipe(
+      bucket.file(uploadOptions.destination).createWriteStream(uploadOptions)
+    )
+      .on('error', function(e){
+        throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
+      })
+      .on('finish', function() {
+        logSuccess(uploadOptions.destination);
+        return done(null, file);
+      });
 
   });
 }

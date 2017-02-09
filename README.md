@@ -21,6 +21,7 @@ The plugin takes a configuration object with the following keys:
 - projectId `String`: Google Cloud Project ID ([docs][gc-docs])
 - base `String`: base path to use in the bucket, default to `/`
 - public `Boolean` (optional): If set to true, marks the uploaded file as public
+- transformDestination `Function` (optional): Manipulates the final destination of the file in the bucket.
 
 ## Example
 
@@ -40,7 +41,10 @@ gulp.task('publish', function() {
         keyFilename: 'path/to/keyFile.json',
         projectId: 'my-project-id',
         base: '/css',
-        public: true,        
+        public: true,
+        transformDestination: function(path) {
+          return path.toLowerCase();
+        },
         metadata: {
             cacheControl: 'max-age=315360000, no-transform, public',
         }
