@@ -36,11 +36,12 @@ function getMetadata(file, metadata) {
  *
  * @param base - Base path
  * @param file - File to save
+ * @return {string} - new relative path for GCS
  */
 function normalizePath(base, file) {
   var _relative = file.path.replace(file.base, '');
 
-  // ensure there is a tailing slash in the base path
+  // ensure there is a trailing slash in the base path
   if (base && !/\/$/.test(base)) {
     base += '/';
   }
@@ -51,7 +52,10 @@ function normalizePath(base, file) {
   }
 
   base = base || '';
-  return base + _relative;
+
+  var newPath = base + _relative;
+
+  return newPath.replace(/\\/g, "/");
 }
 
 /**
@@ -96,7 +100,7 @@ function gPublish(options) {
 
     var bucket = storage.bucket(options.bucket);
 
-    var gcPath = normalizePath(options.base, file).replace(/\\/g, "/");
+    var gcPath = normalizePath(options.base, file);
 
     var metadata = getMetadata(file, options.metadata);
 
@@ -104,7 +108,7 @@ function gPublish(options) {
       destination: options.transformDestination ? options.transformDestination(gcPath) : gcPath,
       metadata: metadata,
       gzip: !!options.gzip,
-      public: options.public || metadata.contentEncoding === "gzip",
+      public: !!options.public,
       resumable: !!options.resumable
     };
 
