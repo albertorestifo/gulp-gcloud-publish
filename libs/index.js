@@ -4,6 +4,7 @@ var gcloudStorage = require('@google-cloud/storage');
 var gutil = require('gulp-util');
 var mime = require('mime');
 var through = require('through2');
+var unixify = require('unixify');
 
 var PLUGIN_NAME = 'gulp-gcloud-publish';
 var PluginError = gutil.PluginError;
@@ -55,7 +56,7 @@ function normalizePath(base, file) {
 
   var newPath = base + _relative;
 
-  return newPath.replace(/\\/g, "/");
+  return unixify(base + _relative);
 }
 
 /**
