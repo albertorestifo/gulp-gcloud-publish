@@ -39,14 +39,12 @@ describe('gulp-gcloud-publish', function() {
 
   var exampleConfig = {
     bucket: 'something',
-    projectId: 'some-id',
-    keyFilename: '/path/to/something.json'
   }
 
   it('should throw an error when missing configuration object', function() {
     expect(function() {
           return gcloudStorage()
-        }).to.throw(/Missing configuration object/);
+        }).to.throw(/Missing required configuration/);
   });
 
   it('should throw an error when missing requred parameters', function() {
@@ -54,23 +52,8 @@ describe('gulp-gcloud-publish', function() {
       return function() { return gcloudStorage(options); };
     }
 
-    // missing projectId
-    expect(callWith({
-      bucket: true,
-      keyFilename: true
-    })).to.throw(/Missing required configuration params/);
-
-    // missing keyFilename
-    expect(callWith({
-      bucket: true,
-      projectId: true
-    })).to.throw(/Missing required configuration params/);
-
     // missing bucket
-    expect(callWith({
-      projectId: true,
-      keyFilename: true
-    })).to.throw(/Missing required configuration params/);
+    expect(callWith({})).to.throw(/Missing required configuration/);
   });
 
   it('should set the correct metadata', function(done) {

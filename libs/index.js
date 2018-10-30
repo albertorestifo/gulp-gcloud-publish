@@ -78,12 +78,8 @@ function logSuccess(gPath) {
  */
 function gPublish(options) {
   // A configuration object is required
-  if (!options) {
-    throw new PluginError(PLUGIN_NAME, 'Missing configuration object!');
-  }
-  // And most of the keys also are
-  if (!options.bucket || !options.keyFilename || !options.projectId) {
-    throw new PluginError(PLUGIN_NAME, 'Missing required configuration params');
+  if (!options || !options.bucket) {
+    throw new PluginError(PLUGIN_NAME, 'Missing required configuration: bucket');
   }
 
   return through.obj(function(file, enc, done) {
