@@ -88,7 +88,9 @@ function gPublish(options) {
 
   return through.obj(function(file, enc, done) {
     /* istanbul ignore next */
-    if (file.isNull()) { done(null, file); }
+    if (file.isNull()) {
+      return done(null, file);
+    }
 
     file.path = file.path.replace(/\.gz$/, '');
 
