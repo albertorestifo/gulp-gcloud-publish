@@ -4,6 +4,7 @@ var gcloudStorage = require('@google-cloud/storage');
 var gutil = require('gulp-util');
 var mime = require('mime');
 var through = require('through2');
+var { Readable } = require('stream');
 
 var PLUGIN_NAME = 'gulp-gcloud-publish';
 var PluginError = gutil.PluginError;
@@ -25,7 +26,7 @@ function getMetadata(file, metadata) {
   }
 
   if (metadata && metadata.cacheControl) {
-      meta.cacheControl = metadata.cacheControl;
+    meta.cacheControl = metadata.cacheControl;
   }
 
   return meta;
@@ -81,8 +82,7 @@ function gPublish(options) {
   if (!options || !options.bucket) {
     throw new PluginError(PLUGIN_NAME, 'Missing required configuration: bucket');
   }
-
-  return through.obj(function(file, enc, done) {
+  return through.obj(/** @param {import('vinyl')} file*/ function (file, enc, done) {
     /* istanbul ignore next */
     if (file.isNull()) {
       return done(null, file);
@@ -110,13 +110,16 @@ function gPublish(options) {
       resumable: !!options.resumable
     };
 
-    file.pipe(
+    //file is Vinyl instance, and since v2 it does not have pipe, see: https://gulpjs.com/docs/en/api/vinyl#instance-methods
+    var fileStream = file.isBuffer() ? Readable.from(file.contents) : file.contents;
+
+    fileStream.pipe(
       bucket.file(uploadOptions.destination).createWriteStream(uploadOptions)
     )
-      .on('error', function(e){
+      .on('error', function (e) {
         throw new PluginError(PLUGIN_NAME, "Error in gcloud connection.\nError message:\n" + JSON.stringify(e));
       })
-      .on('finish', function() {
+      .on('finish', function () {
         logSuccess(uploadOptions.destination);
         return done(null, file);
       });
